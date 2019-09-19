@@ -1,8 +1,17 @@
 import numpy as np
 import pandas as pd
 from tkinter.filedialog import askopenfilename
+import json
 
-def Matrix(edges):
+'''
+Developed on a Linux machine but there should not be any problem running it on a different machine.
+Dependencies:
+    - Numpy for creating the matrix
+    - Pandas for importing the data and cleaning it
+    - Tkinker for handling the open file dialogue
+    - Json for saving the adjacency list
+'''
+def matrix(edges):
     # varaibles named according to what the value in the dictionaries are
     nodes = sorted(edges.keys()) # Sort the nodes according to index then node as value
     index = dict(zip(nodes, range(len(nodes)))) # here the node is the value and the index is the key 
@@ -19,6 +28,12 @@ def Matrix(edges):
                 matrix[i,j] = 1
     return matrix
 
+def adjList(data):
+    # An adjacency list but not in the tabular format
+    data= data.groupby('Vertex1')[['Vertex2', 'weight', 'id']].apply(lambda g: g.values.tolist()).to_dict()
+    with open('adjacencyList.json', 'w') as fp:
+        json.dump(data, fp, indent=4)
+
 def getInput():
     wrongInput = True
     while(wrongInput):
@@ -29,21 +44,28 @@ def getInput():
 
     return userInput
 
+def getFileName():
+    filename = askopenfilename()
+    return filename
 
-def readFile():
-    #filename = askopenfilename()
-    filename = 'edges_1_27307.csv'
+def readFileEdges(filename):
     data = pd.read_csv(filename,sep='\t', header=None, skiprows=1) # read the tab separated file and remove the header
     edges = data.iloc[:,0:2]
     return edges
 
+def readFile(filename):
+    data = pd.read_csv(filename,sep='\t')
+    return data
 
 def main():
-    #userInput = getInput()
-    edges = readFile()
+    userInput = getInput() # It not used
+    filename = getFileName() # Get filename
+    edges = readFileEdges(filename)
     edgeDict = dict(zip(edges[0], edges[1]))
-    matrix = Matrix(edgeDict)
-    np.savetxt("adjacencyMatrix.txt", np.around(matrix, decimals=0),fmt='%.0f',delimiter='\t')
+    ma = matrix(edgeDict)
+    np.savetxt("adjacencyMatrix.txt", np.around(ma, decimals=0),fmt='%.0f',delimiter='\t')
+    data = readFile(filename)
+    adjList(data)
 
 if __name__ == "__main__":
     main()
