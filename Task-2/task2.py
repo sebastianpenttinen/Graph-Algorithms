@@ -34,7 +34,7 @@ def makeNodeList(data):
     print()
 
 
-def dijsktra(graph, startNode, endNode):
+def dijsktra(graph, startNode, endNode, isMinimum):
     shortestPaths = {startNode: (None, 0)}
     currentNode = startNode
     visitedNodes = set()
@@ -60,7 +60,10 @@ def dijsktra(graph, startNode, endNode):
         }
         if not nextDestinations:
             return "There is no path between the selected nodes"
-        currentNode = min(nextDestinations, key=lambda k: nextDestinations[k][1])
+        if isMinimum:
+            currentNode = min(nextDestinations, key=lambda k: nextDestinations[k][1])
+        else:
+            currentNode = max(nextDestinations, key=lambda k: nextDestinations[k][1])
 
     path = []
     weight = []
@@ -91,7 +94,11 @@ def main():
     nodeOne = input("Enter the first node\n")
     nodeTwo = input("Enter the second node\n")
     print("Minimum weighted path\n")
-    result = dijsktra(g, nodeOne, nodeTwo)
+    result = dijsktra(g, nodeOne, nodeTwo, True)
+    print(result)
+    print()
+    print("Maximum weighted path\n")
+    result = dijsktra(g, nodeOne, nodeTwo, False)
     print(result)
 
 
