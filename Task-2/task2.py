@@ -16,6 +16,16 @@ class Graph:
         self.weights[(endNode, startNode)] = weight
 
 
+def getInput():
+    wrongInput = True
+    while wrongInput:
+        userInput = input("Do you want to continue with a new set of nodes? y/n\n")
+        if userInput.lower() == "y" or userInput.lower() == "n":
+            wrongInput = False
+
+    return userInput.lower()
+
+
 def getFileName():
     # filename = askopenfilename()
     filename = "edges_1_27307.csv"
@@ -31,7 +41,6 @@ def makeNodeList(data):
     nodes = dict(zip(data["Vertex1"], data["Vertex2"]))
     nodesSorted = sorted(nodes.keys())
     print(nodesSorted)
-    print()
 
 
 def dijsktra(graph, startNode, endNode, isMinimum):
@@ -90,16 +99,27 @@ def main():
     print("Choose from the following nodes\n")
 
     makeNodeList(data)
+    print()
 
     nodeOne = input("Enter the first node\n")
     nodeTwo = input("Enter the second node\n")
+
     print("Minimum weighted path\n")
+
     result = dijsktra(g, nodeOne, nodeTwo, True)
-    print(result)
+    print(result[0])
+    print(result[1])
     print()
+
     print("Maximum weighted path\n")
+
     result = dijsktra(g, nodeOne, nodeTwo, False)
-    print(result)
+    print(result[0])
+    print(result[1])
+
+    answer = getInput()
+    if answer == "y":
+        main()
 
 
 if __name__ == "__main__":
