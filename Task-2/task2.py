@@ -3,11 +3,22 @@ import pandas as pd
 
 from collections import defaultdict
 
-# Not very well optimized can be really slow
-# n0, n48
+""" The input used can't contain negative cycles
+    Has to be a DAG to work properly
+
+    - tested with theese nodes from the provided graph:
+
+    - Undirected :
+    - n0, n48
+    - n31, n43
+
+    - Directed :
+    - n0, n33
+    - n31, n0
+"""
+
 
 class Graph:
-    # Simple intuitive way of representing a graph
     def __init__(self):
         self.edges = defaultdict(list)
         self.weights = {}
@@ -15,7 +26,7 @@ class Graph:
     def addEdge(self, startNode, endNode, weight, undirected):
         self.edges[startNode].append(endNode)
         if undirected:
-            self.edges[endNode].append(startNode)  # undirected
+            self.edges[endNode].append(startNode)
         self.weights[(startNode, endNode)] = weight
         self.weights[(endNode, startNode)] = weight
 
@@ -31,8 +42,8 @@ def getInput():
 
 
 def getFileName():
-    # filename = askopenfilename()
-    filename = "edges_1_27307.csv"
+    filename = askopenfilename()
+    #filename = "edges_1_27307.csv"
     return filename
 
 
@@ -91,7 +102,7 @@ def makeNegativeGraph(graph, data, graphType):
 def dijsktra(graph, startNode, endNode, isMinimum):
     shortestPaths = {startNode: (None, 0)}
     currentNode = startNode
-    visitedNodes = set()  # to avoid loops
+    visitedNodes = set()
 
     while currentNode != endNode:
         visitedNodes.add(currentNode)
@@ -102,10 +113,7 @@ def dijsktra(graph, startNode, endNode, isMinimum):
             weight = graph.weights[(currentNode, nextNode)] + weightToCurrentNode
 
             if (weight < 0) and isMinimum:
-                return (
-                    "There is a negtive weight in the graph"
-                )  # Will not loop but can't garantee the minmum withted path.
-                # Since it is essential for dijkstras algorithm that adding an edge can't make a path shorter
+                return "There is a negative weight in the graph"
             if weight > 0 and (isMinimum == False):
                 return "There is a positive weight in the graph"
 
@@ -123,12 +131,14 @@ def dijsktra(graph, startNode, endNode, isMinimum):
         }
         if not nextDestinations:
             return "There is no path between the selected nodes"
-
         currentNode = min(nextDestinations, key=lambda j: nextDestinations[j][1])
 
     path = []
     weight = []
+    counter = 0
     while currentNode is not None:
+        if counter == 5000:
+            return "Can't compute there is a negative cycle in the graph"
         path.append(currentNode)
         tmp = shortestPaths[currentNode][1]
         if isMinimum:
@@ -138,6 +148,7 @@ def dijsktra(graph, startNode, endNode, isMinimum):
             weight.append(tmp)
         nextNode = shortestPaths[currentNode][0]
         currentNode = nextNode
+        counter += 1
 
     path = path[::-1]
     weight = weight[::-1]
@@ -148,11 +159,11 @@ def main():
     graphType = getGraphType()
     filename = getFileName()
     data = readFile(filename)
+
     g = Graph()
     makePositiveGraph(g, data, graphType)
 
     n = Graph()
-
     makeNegativeGraph(n, data, graphType)
 
     print("Lookup minimum and maximum weighted paths\n")
