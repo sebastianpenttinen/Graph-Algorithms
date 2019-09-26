@@ -73,7 +73,7 @@ def getGraphType():
     wrongInput = True
     while wrongInput:
         userInput = input(
-            'If the graph is directed enter "d" if undirected enter "u"\n'
+            'If the graph should be treated as directed enter "d" if undirected enter "u"\n'
         )
         if userInput.lower() == "d" or userInput.lower() == "u":
             wrongInput = False
@@ -155,9 +155,7 @@ def dijsktra(graph, startNode, endNode, isMinimum):
     return path, weight
 
 
-def main():
-    graphType = getGraphType()
-    filename = getFileName()
+def main(graphType, filename):
     data = readFile(filename)
 
     g = Graph()
@@ -184,8 +182,12 @@ def main():
 
     answer = getInput()
     if answer == "y":
-        main()
+        graphType = getGraphType()
+        main(graphType, filename)
 
 
 if __name__ == "__main__":
-    main()
+    graphType = getGraphType()
+    print('Please provide the graph')
+    filename = getFileName()
+    main(graphType, filename)
