@@ -5,13 +5,15 @@ from collections import defaultdict
 
 
 class Graph:
+    # Simple intuitive way of representing a graph
     def __init__(self):
         self.edges = defaultdict(list)
         self.weights = {}
 
-    def addEdge(self, startNode, endNode, weight):
+    def addEdge(self, startNode, endNode, weight, undirected):
         self.edges[startNode].append(endNode)
-        self.edges[endNode].append(startNode)  # undirected
+        if undirected:
+            self.edges[endNode].append(startNode)  # undirected
         self.weights[(startNode, endNode)] = weight
         self.weights[(endNode, startNode)] = weight
 
@@ -27,8 +29,8 @@ def getInput():
 
 
 def getFileName():
-    # filename = askopenfilename()
-    filename = "edges_1_27307.csv"
+    filename = askopenfilename()
+    #filename = "edges_1_27307.csv"
     return filename
 
 
@@ -40,13 +42,36 @@ def readFile(filename):
 def makeNodeList(data):
     nodes = dict(zip(data["Vertex1"], data["Vertex2"]))
     nodesSorted = sorted(nodes.keys())
-    print(nodesSorted)
+    return nodesSorted
+
+
+def printOutput(g, nodeOne, nodeTwo, minOrMax):
+    result = dijsktra(g, nodeOne, nodeTwo, minOrMax)
+
+    if isinstance(result, str):
+        print(result)
+
+    else:
+        print(result[0])
+        print(result[1])
+
+
+def getGraphType():
+    wrongInput = True
+    while wrongInput:
+        userInput = input(
+            'If the graph is directed enter "d" if undirected enter "u"\n'
+        )
+        if userInput.lower() == "d" or userInput.lower() == "u":
+            wrongInput = False
+
+    return userInput.lower()
 
 
 def dijsktra(graph, startNode, endNode, isMinimum):
     shortestPaths = {startNode: (None, 0)}
     currentNode = startNode
-    visitedNodes = set()
+    visitedNodes = set()  # to avoid loops
 
     while currentNode != endNode:
         visitedNodes.add(currentNode)
@@ -55,6 +80,12 @@ def dijsktra(graph, startNode, endNode, isMinimum):
 
         for nextNode in destinations:
             weight = graph.weights[(currentNode, nextNode)] + weightToCurrentNode
+
+            if weight < 0 and isMinimum:
+                return (
+                    "There is a negtive weight in the graph"
+                )  # Will not loop but can't garantee the minmum withted path
+
             if nextNode not in shortestPaths:
                 shortestPaths[nextNode] = (currentNode, weight)
             else:
@@ -88,17 +119,21 @@ def dijsktra(graph, startNode, endNode, isMinimum):
 
 
 def main():
+    graphType = getGraphType()
     filename = getFileName()
     data = readFile(filename)
     g = Graph()
 
     for _, row in data.iterrows():
-        g.addEdge(row["Vertex1"], row["Vertex2"], row["weight"])
+        if graphType == "u":
+            g.addEdge(row["Vertex1"], row["Vertex2"], row["weight"], True)
+        else:
+            g.addEdge(row["Vertex1"], row["Vertex2"], row["weight"], False)
 
     print("Lookup minimum and maximum weighted paths\n")
     print("Choose from the following nodes\n")
 
-    makeNodeList(data)
+    print(makeNodeList(data))
     print()
 
     nodeOne = input("Enter the first node\n")
@@ -106,16 +141,10 @@ def main():
 
     print("Minimum weighted path\n")
 
-    result = dijsktra(g, nodeOne, nodeTwo, True)
-    print(result[0])
-    print(result[1])
-    print()
+    printOutput(g, nodeOne, nodeTwo, True)
 
     print("Maximum weighted path\n")
-
-    result = dijsktra(g, nodeOne, nodeTwo, False)
-    print(result[0])
-    print(result[1])
+    printOutput(g, nodeOne, nodeTwo, False)
 
     answer = getInput()
     if answer == "y":
