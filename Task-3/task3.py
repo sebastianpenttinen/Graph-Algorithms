@@ -1,6 +1,6 @@
 from collections import defaultdict
 import pandas as pd
-
+from tkinter.filedialog import askopenfilename
 
 class Graph:
     def __init__(self):
@@ -21,8 +21,8 @@ class Graph:
 
 
 def getFileName():
-    # filename = askopenfilename()
-    filename = "benchmark3.csv"
+    filename = askopenfilename()
+    #filename = "benchmark3.csv"
     return filename
 
 
@@ -39,6 +39,7 @@ def makeGraph(graph, data):
 
 
 def makeGraphFromNodes(graph, nodes):
+    # Not very great but it works......
     t = Graph()
     for i in nodes:
         t.addNode(i)
@@ -49,12 +50,16 @@ def makeGraphFromNodes(graph, nodes):
 
 
 def lookupId(data, edges):
+    # take the edges and look them up in the original data
     ids = []
     for i in edges[0]:
         edgeID = data.loc[(data["Vertex1"] == i[0]) & (data["Vertex2"] == i[1])]
         tmp = edgeID["id"].tolist()
-        if len(tmp) != 0:
-            ids.append(tmp[0])
+        if len(tmp) == 0:
+            edgeID = data.loc[(data["Vertex1"] == i[1]) & (data["Vertex2"] == i[0])]
+            tmp = edgeID["id"].tolist()
+        ids.append(tmp[0])
+
     return ids
 
 
