@@ -31,14 +31,11 @@ def readFile(filename):
     return data
 
 
-def makeGraph(graph, data, graphType):
+def makeGraph(graph, data):
     for _, row in data.iterrows():
-        if graphType == "u":
-            graph.addNode(row["Vertex1"])
-            graph.addNode(row["Vertex2"])
-            graph.addEdge(row["Vertex1"], row["Vertex2"], row["weight"], True)
-        else:
-            graph.addEdge(row["Vertex1"], row["Vertex2"], row["weight"], False)
+        graph.addNode(row["Vertex1"])
+        graph.addNode(row["Vertex2"])
+        graph.addEdge(row["Vertex1"], row["Vertex2"], row["weight"], True)
 
 
 def lookupId(data, edges):
@@ -74,20 +71,17 @@ def prim(graph):
                     crossRoad.add((i, j))
 
         # find the edge with the smallest weight in crossRoad
-        # This can be improved
-        weight = 1000000000
-        minEdge = ("", "")
+        weights = []
+        edges = []
         for index in crossRoad:
             tmp = graph.weights.get(index)
             if tmp is not None:
-                if tmp < weight:
-                    weight = tmp
-                    minEdge = index
+                weights.append(tmp)
+                edges.append(index)
 
-        minimumSpanningTree.add(minEdge)
-
-        visitedNodes.add(minEdge[1])
-        totalWeight += weight
+        minimumSpanningTree.add(edges[weights.index(min(weights))])
+        visitedNodes.add(edges[weights.index(min(weights))][1])
+        totalWeight += min(weights)
 
     return minimumSpanningTree, totalWeight
 
@@ -97,7 +91,7 @@ def main():
     data = readFile(filename)
     g = Graph()
 
-    makeGraph(g, data, "u")
+    makeGraph(g, data)
     writeTofile(lookupId(data, prim(g)))
 
 
