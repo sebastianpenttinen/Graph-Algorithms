@@ -103,22 +103,22 @@ def prim(graph):
 
 
 def connectedComponents(graph):
-    result = []
+    connectedComp = []
     nodes = set(graph.nodes)
     while nodes:
-        n = nodes.pop()
-        group = {n}
-        queue = [n]
+        i = nodes.pop()
+        group = {i}
+        queue = [i]
 
         while queue:
-            n = queue.pop(0)
-            edges = set(graph.edges.get(n))
+            i = queue.pop(0)
+            edges = set(graph.edges.get(i))
             edges.difference_update(group)
             nodes.difference_update(edges)
             group.update(edges)
             queue.extend(edges)
-        result.append(group)
-    return result
+        connectedComp.append(group)
+    return connectedComp
 
 
 def main():
