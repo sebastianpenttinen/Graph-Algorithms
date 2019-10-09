@@ -32,13 +32,34 @@ def makeGraph(graph, data):
         graph.addNode(row["Vertex1"])
         graph.addNode(row["Vertex2"])
         graph.addEdge(row["Vertex1"], row["Vertex2"], True)
+        
+
+def nodeColoring(graph):
+    sortedNodes = sorted(graph.edges.items(), key=lambda i: len(i[1]), reverse=True)
+    
+    nodeColors = {}
+
+    for node in sortedNodes:
+        freeColors = [True] * len(sortedNodes)
+        for adjacentNode in graph.edges.get(node[0]):
+            if adjacentNode in nodeColors:
+                color = nodeColors[adjacentNode]
+                freeColors[color] = False
+        for color, available in enumerate(freeColors):
+            if available:
+                nodeColors[node[0]] = color
+                break
+
+    return nodeColors
+
 
 def main():
     filename = getFileName()
     data = readFile(filename)
     g = Graph()
     makeGraph(g, data)
-
+    color = nodeColoring(g)
+    print (color)
 
 if __name__ == "__main__":
     main()
