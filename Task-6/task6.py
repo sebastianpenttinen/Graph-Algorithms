@@ -39,29 +39,32 @@ class Graph:
             if name == node:
                 return node
 
-    def findPath(self, start, end, path):
-        if start == end:
-            return path
-        for edge in self.edges[start]:
-            residualCapacity = edge.capacity - edge.flow
-            if residualCapacity > 0 and not (edge, residualCapacity) in path:
-                result = self.findPath(edge.end, end, path + [(edge, residualCapacity)])
-                if result != None:
-                    return result
 
-    def calculateMaxFlow(self):
-        source = self.getNode("source")
-        sink = self.getNode("sink")
+def findPath(graph, start, end, path):
+    if start == end:
+        return path
 
-        path = self.findPath(source, sink, [])
+    for edge in graph.edges[start]:
+        flowLeft = edge.capacity - edge.flow
+        if flowLeft > 0 and not (edge, flowLeft) in path:
+            result = findPath(graph, edge.end, end, path + [(edge, flowLeft)])
+            if result != None:
+                return result
 
-        while path != None:
-            flow = min(edge[1] for edge in path)
-            for edge, _ in path:
-                edge.flow += flow
-                edge.backEdge.flow -= flow
-            path = self.findPath(source, sink, [])
-        return sum(edge.flow for edge in self.edges[source])
+
+def maxFlow(graph):
+    source = graph.getNode("source")
+    sink = graph.getNode("sink")
+
+    path = findPath(graph, source, sink, [])
+
+    while path != None:
+        flow = min(edge[1] for edge in path)
+        for edge, _ in path:
+            edge.flow += flow
+            edge.backEdge.flow -= flow
+        path = findPath(graph, source, sink, [])
+    return sum(edge.flow for edge in graph.edges[source])
 
 
 def getFileName():
@@ -104,8 +107,8 @@ def main():
     data = readFile(filename)
     g = Graph()
     makeGraph(g, data)
-    maxFlow = g.calculateMaxFlow()
-    writeToCSV(g, maxFlow)
+    mf = maxFlow(g)
+    writeToCSV(g, mf)
 
 
 if __name__ == "__main__":
