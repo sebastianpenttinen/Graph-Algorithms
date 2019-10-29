@@ -48,7 +48,7 @@ def findPath(graph, start, end, path):
         flowLeft = edge.capacity - edge.flow
         if flowLeft > 0 and not (edge, flowLeft) in path:
             result = findPath(graph, edge.end, end, path + [(edge, flowLeft)])
-            if result != None:
+            if result:
                 return result
 
 
@@ -58,13 +58,19 @@ def maxFlow(graph):
 
     path = findPath(graph, source, sink, [])
 
-    while path != None:
+    while path:
         flow = min(edge[1] for edge in path)
         for edge, _ in path:
             edge.flow += flow
             edge.backEdge.flow -= flow
         path = findPath(graph, source, sink, [])
-    return sum(edge.flow for edge in graph.edges[source])
+
+    mf = 0
+
+    for edge in graph.edges[source]:
+        mf += edge.flow
+
+    return mf
 
 
 def getFileName():
