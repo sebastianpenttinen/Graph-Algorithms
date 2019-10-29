@@ -21,8 +21,8 @@ class Graph:
 
 
 def getFileName():
-    # filename = askopenfilename()
-    filename = "benchmark4.csv"
+    filename = askopenfilename()
+    #filename = "benchmark4.csv"
     return filename
 
 
