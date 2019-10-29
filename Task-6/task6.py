@@ -59,7 +59,11 @@ def maxFlow(graph):
     path = findPath(graph, source, sink, [])
 
     while path:
-        flow = min(edge[1] for edge in path)
+        flow = float("Inf")
+        for edge in path:
+            if edge[1] < flow:
+                flow = edge[1]
+                
         for edge, _ in path:
             edge.flow += flow
             edge.backEdge.flow -= flow
