@@ -3,11 +3,6 @@ from collections import defaultdict
 from tkinter.filedialog import askopenfilename
 import csv
 
-class Node:
-    def __init__(self, label, source=False, sink=False):
-        self.label = label
-        self.source = source
-        self.sink = sink
 
 class Edge:
     def __init__(self, start, end, capacity, edgeId):
@@ -16,33 +11,33 @@ class Edge:
         self.capacity = capacity
         self.edgeId = edgeId
         self.flow = 0
-        self.returnEdge = None
+        self.backEdge = None
+
 
 class Graph:
     def __init__(self):
         self.nodes = []
         self.edges = defaultdict(list)
-        
-    def getNode(self, name):
-        for node in self.nodes:
-            if name == node.label:
-                return node
 
     def addEdge(self, start, end, capacity, edgeId):
-        newEdge = Edge(start, end, capacity, edgeId)
-        returnEdge = Edge(end, start, 0, "")
-        newEdge.returnEdge = returnEdge
-        returnEdge.returnEdge = newEdge
-        vertex = self.getNode(start)
-        self.edges[vertex.label].append(newEdge)
-        returnNode = self.getNode(end)
-        self.edges[returnNode.label].append(returnEdge)
+        edgeToAdd = Edge(start, end, capacity, edgeId)
+        backEdge = Edge(end, start, 0, "")
+        edgeToAdd.backEdge = backEdge
+        backEdge.backEdge = edgeToAdd
+        node = self.getNode(start)
+        self.edges[node].append(edgeToAdd)
+        backNode = self.getNode(end)
+        self.edges[backNode].append(backEdge)
 
-    def addNode(self, node, source=False, sink=False):
+    def addNode(self, node):
         if node not in self.nodes:
-            node = Node(node, source, sink)
             self.nodes.append(node)
-            self.edges[node.label] = []
+            self.edges[node] = []
+
+    def getNode(self, name):
+        for node in self.nodes:
+            if name == node:
+                return node
 
     def findPath(self, start, end, path):
         if start == end:
@@ -55,20 +50,22 @@ class Graph:
                     return result
 
     def calculateMaxFlow(self):
-        source = self.getNode('source')
-        sink = self.getNode('sink')
-        
-        path = self.findPath(source.label, sink.label, [])
+        source = self.getNode("source")
+        sink = self.getNode("sink")
+
+        path = self.findPath(source, sink, [])
+
         while path != None:
             flow = min(edge[1] for edge in path)
             for edge, _ in path:
                 edge.flow += flow
-                edge.returnEdge.flow -= flow
-            path = self.findPath(source.label, sink.label, [])
-        return sum(edge.flow for edge in self.edges[source.label])
+                edge.backEdge.flow -= flow
+            path = self.findPath(source, sink, [])
+        return sum(edge.flow for edge in self.edges[source])
+
 
 def getFileName():
-    #filename = askopenfilename()
+    # filename = askopenfilename()
     filename = "benchmark6.csv"
     return filename
 
@@ -79,17 +76,10 @@ def readFile(filename):
 
 
 def makeGraph(graph, data):
+
     for _, row in data.iterrows():
-
-        if row["Vertex1"] == 'source':
-            graph.addNode(row["Vertex1"], True, False)
-
-        elif row["Vertex2"] == 'sink':
-            graph.addNode(row["Vertex2"], False, True)
-
-        else:
-            graph.addNode(row["Vertex1"])
-            graph.addNode(row["Vertex2"])
+        graph.addNode(row["Vertex1"])
+        graph.addNode(row["Vertex2"])
 
     for _, row in data.iterrows():
         graph.addEdge(row["Vertex1"], row["Vertex2"], row["capacity"], row["id"])
@@ -108,6 +98,7 @@ def writeToCSV(graph, maxFlow):
                     writer.writerow({"edge_id": i.edgeId, "flow_value": i.flow})
         writer.writerow({"edge_id": "Max-flow value", "flow_value": maxFlow})
 
+
 def main():
     filename = getFileName()
     data = readFile(filename)
@@ -115,5 +106,7 @@ def main():
     makeGraph(g, data)
     maxFlow = g.calculateMaxFlow()
     writeToCSV(g, maxFlow)
+
+
 if __name__ == "__main__":
     main()
