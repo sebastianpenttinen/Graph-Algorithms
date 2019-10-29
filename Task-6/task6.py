@@ -43,16 +43,27 @@ class Graph:
 def findPath(graph, start, end, path):
     if start == end:
         return path
+<<<<<<< HEAD
 
     for edge in graph.edges[start]:
         flowLeft = edge.capacity - edge.flow
         if flowLeft > 0 and not (edge, flowLeft) in path:
             result = findPath(graph, edge.end, end, path + [(edge, flowLeft)])
+=======
+    for edge in graph.edges[start]:
+        residualCapacity = edge.capacity - edge.flow
+        if residualCapacity > 0 and not (edge, residualCapacity) in path:
+            result = findPath(graph, edge.end, end, path + [(edge, residualCapacity)])
+>>>>>>> 2cf7836dfef6bbc47ebe725d2c536f97e4a64a9a
             if result != None:
                 return result
 
 
+<<<<<<< HEAD
 def maxFlow(graph):
+=======
+def calculateMaxFlow(graph):
+>>>>>>> 2cf7836dfef6bbc47ebe725d2c536f97e4a64a9a
     source = graph.getNode("source")
     sink = graph.getNode("sink")
 
