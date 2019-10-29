@@ -1,4 +1,5 @@
 import pandas as pd
+from collections import defaultdict
 from tkinter.filedialog import askopenfilename
 import csv
 
@@ -9,38 +10,27 @@ class Node:
         self.sink = sink
 
 class Edge:
-    def __init__(self, start, end, capacity):
+    def __init__(self, start, end, capacity, edgeId):
         self.start = start
         self.end = end
         self.capacity = capacity
+        self.edgeId = edgeId
         self.flow = 0
         self.returnEdge = None
 
 class Graph:
     def __init__(self):
         self.nodes = []
-        self.edges = {}
+        self.edges = defaultdict(list)
         
     def getNode(self, name):
         for node in self.nodes:
             if name == node.label:
                 return node
 
-
-    def findSource(self):
-        for node in self.nodes:
-            if node.source == True:
-                return node
-
-    def findSink(self):
-        for node in self.nodes:
-            if node.sink == True:
-                return node
-
-
-    def addEdge(self, start, end, capacity):
-        newEdge = Edge(start, end, capacity)
-        returnEdge = Edge(end, start, 0)
+    def addEdge(self, start, end, capacity, edgeId):
+        newEdge = Edge(start, end, capacity, edgeId)
+        returnEdge = Edge(end, start, 0, "")
         newEdge.returnEdge = returnEdge
         returnEdge.returnEdge = newEdge
         vertex = self.getNode(start)
@@ -65,8 +55,8 @@ class Graph:
                     return result
 
     def calculateMaxFlow(self):
-        source = self.findSource()
-        sink = self.findSink()
+        source = self.getNode('source')
+        sink = self.getNode('sink')
         
         path = self.findPath(source.label, sink.label, [])
         while path != None:
@@ -102,23 +92,28 @@ def makeGraph(graph, data):
             graph.addNode(row["Vertex2"])
 
     for _, row in data.iterrows():
-        graph.addEdge(row["Vertex1"], row["Vertex2"], row["capacity"])
+        graph.addEdge(row["Vertex1"], row["Vertex2"], row["capacity"], row["id"])
 
 
-def writeToCSV(coloredGraph):
+def writeToCSV(graph, maxFlow):
     with open("Flow.csv", mode="w") as csvFile:
         fieldnames = ["edge_id", "flow_value"]
         writer = csv.DictWriter(csvFile, fieldnames=fieldnames, delimiter="\t")
         writer.writeheader()
-        for key, value in coloredGraph.items():
-            writer.writerow({"edge_id": key, "flow_value": value})
+        for _, value in graph.edges.items():
+            for i in value:
+                if i.edgeId == "":
+                    continue
+                else:
+                    writer.writerow({"edge_id": i.edgeId, "flow_value": i.flow})
+        writer.writerow({"edge_id": "Max-flow value", "flow_value": maxFlow})
 
 def main():
     filename = getFileName()
     data = readFile(filename)
     g = Graph()
     makeGraph(g, data)
-    print(g.calculateMaxFlow())
-
+    maxFlow = g.calculateMaxFlow()
+    writeToCSV(g, maxFlow)
 if __name__ == "__main__":
     main()
