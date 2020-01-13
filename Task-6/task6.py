@@ -78,8 +78,8 @@ def maxFlow(graph):
 
 
 def getFileName():
-    # filename = askopenfilename()
-    filename = "benchmark6.csv"
+    filename = askopenfilename()
+    #filename = "benchmark6.csv"
     return filename
 
 
